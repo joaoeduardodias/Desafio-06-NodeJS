@@ -1,9 +1,9 @@
 {
-  "username": "postgres",
-  "password": "docker",
+  "type": "postgres",
+  "username": "docker",
+  "password": "ignite",
 
   "name": "default",
-  "type": "postgres",
   "host": "localhost",
   "port": 5432,
   "database": "fin_api",
@@ -17,3 +17,5 @@
     "migrationsDir": "./src/database/migrations"
   }
 }
+
+
