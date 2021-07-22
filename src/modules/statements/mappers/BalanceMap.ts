@@ -7,9 +7,21 @@ export class BalanceMap {
       amount,
       description,
       type,
+      sender_id,
       created_at,
       updated_at
-    }) => (
+    }) => type ==='transfers'
+    ?
+
+    {
+        id,
+        amount: Number(amount),
+        description,
+        type,
+        sender_id,
+        created_at,
+        updated_at
+      }:
       {
         id,
         amount: Number(amount),
@@ -18,7 +30,7 @@ export class BalanceMap {
         created_at,
         updated_at
       }
-    ));
+    );
 
     return {
       statement: parsedStatement,

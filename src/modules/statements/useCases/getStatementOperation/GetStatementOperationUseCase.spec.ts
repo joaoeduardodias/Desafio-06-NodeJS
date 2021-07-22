@@ -17,6 +17,7 @@ describe("Show Statement",()=>{
   enum OperationType {
     DEPOSIT = 'deposit',
     WITHDRAW = 'withdraw',
+    TRANSFER= 'transfers'
   }
   beforeEach(()=>{
     usersRepository  = new InMemoryUsersRepository()

@@ -7,11 +7,12 @@ import { hash } from "bcryptjs";
 import { app } from "../../../../app";
 
 let connection: Connection
-
+let id_recipient = uuidV4()
 describe("List all Statements of User",()=>{
   enum OperationType {
     DEPOSIT = 'deposit',
     WITHDRAW = 'withdraw',
+    TRANSFER= 'transfers'
   }
   beforeAll(async()=>{
    connection = await createConnection()
@@ -24,6 +25,10 @@ describe("List all Statements of User",()=>{
         `INSERT INTO users(id, name, email, password, created_at, updated_at)
          VALUES('${id}','test','email@test.com.br', '${password}', 'now()', 'now()')`
      );
+     await connection.query(
+      `INSERT INTO users(id, name, email, password, created_at, updated_at)
+       VALUES('${id_recipient}','test','email@test2.com.br', '${password}', 'now()', 'now()')`
+   );
 
   })
 
@@ -39,13 +44,19 @@ describe("List all Statements of User",()=>{
     })
     const { token } = responseToken.body
 
-    await request(app).post("/api/v1/statements/deposit").send({
+
+   await request(app).post("/api/v1/statements/deposit").send({
       description: "Test deposit",
       amount: 100
     }).set({
       Authorization: `Bearer ${token}`
     })
-
+   await request(app).post(`/api/v1/statements/transfers/${id_recipient}`).send({
+      description: "Test transfer",
+      amount: 50
+    }).set({
+      Authorization: `Bearer ${token}`
+    })
 
     const response =  await request(app).get("/api/v1/statements/balance").set({
         Authorization: `Bearer ${token}`
@@ -53,16 +64,7 @@ describe("List all Statements of User",()=>{
 
       expect(response.status).toBe(200)
       expect(response.body).toHaveProperty("balance")
-      expect(response.body.statement).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            type: 'deposit' as OperationType,
-            amount: 100,
-            description: "Test deposit"
-          }),
 
-        ])
-      );
   })
 
   it("should not be able to list all operations nonexist user", async()=>{

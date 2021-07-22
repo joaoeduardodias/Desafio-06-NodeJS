@@ -12,8 +12,8 @@ describe("List Statements",()=>{
   enum OperationType {
     DEPOSIT = 'deposit',
     WITHDRAW = 'withdraw',
+    TRANSFER= 'transfers'
   }
-
   beforeEach(()=>{
     usersRepository = new InMemoryUsersRepository()
     statementsRepository = new InMemoryStatementsRepository()
@@ -27,49 +27,52 @@ describe("List Statements",()=>{
       email: "email@test.com.br",
       password: "123456"
     })
-    const user_id = user.id as string;
+    const user_recipient = await usersRepository.create({
+      name: "Norman Weber",
+      email: "jofeva@ruhgaziji.se",
+      password: '123456'
+    })
     await statementsRepository.create({
-      user_id,
+      user_id: user.id as string,
+      type: 'deposit' as OperationType,
+      amount: 400,
+      description: "Create statement deposit"
+    });
+
+    await statementsRepository.create({
+      user_id: user.id as string,
       type: 'withdraw' as OperationType,
       amount: 50,
-      description: "Create statement"
+      description: "Create statement withdraw"
     });
-    await statementsRepository.create({
-     user_id,
-     type: 'deposit' as OperationType,
-     amount: 100,
-     description: "Create statement"
-   });
+
+   await statementsRepository.create({
+    user_id: user.id as string,
+    recipient_id: user_recipient.id,
+    sender_id: user.id as string,
+    type: 'transfers' as OperationType,
+    amount: 100,
+    description: "Create statement transfer"
+  });
 
    const balance = await getBalanceUseCase.execute({
-     user_id,
+    user_id: user.id as string
    })
 
-   expect(balance).toHaveProperty("balance")
-   expect(balance.statement).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        type: 'withdraw' as OperationType,
-        amount: 50,
-        description: "Create statement"
-      }),
 
-    ])
-  );
+   expect(balance).toHaveProperty("balance")
+
 
 
   })
 
-  it("should not be able to list statements nonexistent user",()=>{
+  it("should not be able to list statements nonexistent user",async()=>{
 
-      expect(async()=>{
-
-        await getBalanceUseCase.execute({
+     await expect( getBalanceUseCase.execute({
         user_id: "123"
-
       })
 
-      }).rejects.toBeInstanceOf(GetBalanceError)
+      ).rejects.toEqual(new GetBalanceError())
 
   })
 
